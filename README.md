@@ -1,4 +1,4 @@
-# Git Nuke Command
+# Git Sync Command
 Shortcut for merging master into develop
 
 ## Install:
