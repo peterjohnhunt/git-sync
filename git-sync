@@ -2,7 +2,30 @@
 
 source "$(git --exec-path)/git-sh-setup"
 
-git checkout develop &&
-git merge master &&
-git push &&
-git checkout master
+USAGE=""
+
+function _sync() {
+    if [[ $# != 0 ]]; then
+        usage
+    fi
+    require_clean_work_tree "sync"
+    git fetch origin || die "Could not fetch origin"
+
+    if git show-ref --verify --quiet refs/remotes/origin/master; then
+        MAIN="master"
+    elif git show-ref --verify --quiet refs/remotes/origin/main; then
+        MAIN="main"
+    else
+        die "No origin/master or origin/main branch"
+    fi
+    git show-ref --verify --quiet refs/remotes/origin/develop || die "No origin/develop branch"
+
+    BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+    git checkout develop &&
+    git pull --ff-only origin develop &&
+    git merge --no-edit origin/$MAIN &&
+    git push origin develop &&
+    git checkout "$BRANCH"
+}
+
+_sync "$@"
